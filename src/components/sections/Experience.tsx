@@ -4,6 +4,12 @@ import { SectionWrapper, SectionHeader } from '../ui/SectionWrapper'
 import { ScrollReveal } from '../animations/ScrollReveal'
 import { portfolioData } from '../../data/portfolio-data'
 
+const timelineColors = [
+  { accent: 'var(--color-coral)', bg: 'rgba(255, 107, 107, 0.12)', border: 'rgba(255, 107, 107, 0.3)' },
+  { accent: 'var(--color-teal)', bg: 'rgba(20, 184, 166, 0.12)', border: 'rgba(20, 184, 166, 0.3)' },
+  { accent: 'var(--color-purple)', bg: 'rgba(167, 139, 250, 0.12)', border: 'rgba(167, 139, 250, 0.3)' },
+]
+
 export function Experience() {
   const { experience } = portfolioData
 
@@ -15,149 +21,171 @@ export function Experience() {
       />
 
       <div style={{ position: 'relative' }}>
-        {/* Timeline line - hidden on mobile, shown on desktop */}
+        {/* Timeline line with gradient */}
         <div
           style={{
             position: 'absolute',
             left: '2rem',
             top: 0,
             bottom: 0,
-            width: '2px',
-            backgroundColor: 'var(--color-border)',
+            width: '3px',
+            background: 'linear-gradient(to bottom, var(--color-coral), var(--color-teal), var(--color-purple))',
+            borderRadius: '2px',
           }}
           className="timeline-line"
         />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-          {experience.map((exp, index) => (
-            <ScrollReveal key={exp.id} delay={index * 0.1}>
-              <div
-                style={{
-                  position: 'relative',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2rem',
-                }}
-                className={`experience-item ${index % 2 === 0 ? 'even' : 'odd'}`}
-              >
-                {/* Timeline dot */}
+          {experience.map((exp, index) => {
+            const colorScheme = timelineColors[index % timelineColors.length]
+            return (
+              <ScrollReveal key={exp.id} delay={index * 0.1}>
                 <div
                   style={{
-                    position: 'absolute',
-                    left: '2rem',
-                    transform: 'translateX(-50%)',
-                    width: '1rem',
-                    height: '1rem',
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--color-accent)',
-                    border: '4px solid var(--color-background)',
-                    zIndex: 10,
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2rem',
                   }}
-                  className="timeline-dot"
-                />
-
-                {/* Content card */}
-                <motion.div
-                  style={{
-                    marginLeft: '5rem',
-                  }}
-                  className="experience-card"
-                  whileHover={{ y: -4 }}
+                  className={`experience-item ${index % 2 === 0 ? 'even' : 'odd'}`}
                 >
+                  {/* Timeline dot with ring */}
                   <div
                     style={{
-                      backgroundColor: 'var(--color-card)',
-                      borderRadius: '1rem',
-                      border: '1px solid var(--color-border)',
-                      padding: '2rem',
-                      transition: 'all 0.3s ease',
+                      position: 'absolute',
+                      left: '2rem',
+                      transform: 'translateX(-50%)',
+                      width: '1.25rem',
+                      height: '1.25rem',
+                      borderRadius: '50%',
+                      backgroundColor: colorScheme.accent,
+                      border: '4px solid var(--color-background)',
+                      boxShadow: `0 0 0 3px ${colorScheme.border}, 0 4px 12px ${colorScheme.border}`,
+                      zIndex: 10,
                     }}
+                    className="timeline-dot"
+                  />
+
+                  {/* Content card */}
+                  <motion.div
+                    style={{
+                      marginLeft: '5rem',
+                    }}
+                    className="experience-card"
+                    whileHover={{ y: -4 }}
                   >
-                    {/* Period badge */}
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        padding: '0.375rem 0.875rem',
-                        borderRadius: '9999px',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        color: 'var(--color-accent)',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        marginBottom: '1rem',
-                      }}
-                    >
-                      {exp.period}
-                    </span>
-
-                    <h3
-                      style={{
-                        fontSize: '1.25rem',
-                        fontWeight: 700,
-                        color: 'var(--color-primary)',
-                        marginBottom: '0.5rem',
-                      }}
-                    >
-                      {exp.title}
-                    </h3>
-
                     <div
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        color: 'var(--color-secondary)',
-                        marginBottom: '1rem',
-                        flexWrap: 'wrap',
+                        backgroundColor: 'var(--color-card)',
+                        borderRadius: '1.25rem',
+                        border: `2px solid var(--color-border)`,
+                        padding: '2rem',
+                        transition: 'all 0.3s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
                       }}
                     >
-                      <span style={{ fontWeight: 500 }}>{exp.company}</span>
-                      <span style={{ color: 'var(--color-border)' }}>|</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <FiMapPin style={{ width: '0.875rem', height: '0.875rem' }} />
-                        <span style={{ fontSize: '0.875rem' }}>{exp.location}</span>
+                      {/* Decorative corner gradient */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          width: '150px',
+                          height: '150px',
+                          background: `radial-gradient(circle at top right, ${colorScheme.bg}, transparent 70%)`,
+                          pointerEvents: 'none',
+                        }}
+                      />
+
+                      {/* Period badge */}
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '9999px',
+                          backgroundColor: colorScheme.bg,
+                          color: colorScheme.accent,
+                          fontSize: '0.875rem',
+                          fontWeight: 600,
+                          marginBottom: '1rem',
+                          border: `1px solid ${colorScheme.border}`,
+                        }}
+                      >
+                        {exp.period}
+                      </span>
+
+                      <h3
+                        style={{
+                          fontSize: '1.375rem',
+                          fontWeight: 700,
+                          color: 'var(--color-primary)',
+                          marginBottom: '0.5rem',
+                          fontFamily: 'var(--font-heading)',
+                        }}
+                      >
+                        {exp.title}
+                      </h3>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          color: 'var(--color-secondary)',
+                          marginBottom: '1.25rem',
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <span style={{ fontWeight: 600, color: colorScheme.accent }}>{exp.company}</span>
+                        <span style={{ color: 'var(--color-border)', fontSize: '1.25rem' }}>•</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                          <FiMapPin style={{ width: '0.875rem', height: '0.875rem' }} />
+                          <span style={{ fontSize: '0.875rem' }}>{exp.location}</span>
+                        </div>
+                      </div>
+
+                      <p
+                        style={{
+                          color: 'var(--color-muted-foreground)',
+                          marginBottom: '1.5rem',
+                          lineHeight: 1.7,
+                        }}
+                      >
+                        {exp.description}
+                      </p>
+
+                      {/* Achievements */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {exp.achievements.map((achievement, achIndex) => (
+                          <div
+                            key={achIndex}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '0.75rem',
+                              fontSize: '0.9375rem',
+                            }}
+                          >
+                            <FiCheckCircle
+                              style={{
+                                width: '1.125rem',
+                                height: '1.125rem',
+                                color: colorScheme.accent,
+                                marginTop: '0.125rem',
+                                flexShrink: 0,
+                              }}
+                            />
+                            <span style={{ color: 'var(--color-foreground)', lineHeight: 1.5 }}>{achievement}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
-
-                    <p
-                      style={{
-                        color: 'var(--color-muted-foreground)',
-                        marginBottom: '1.25rem',
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {exp.description}
-                    </p>
-
-                    {/* Achievements */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
-                      {exp.achievements.map((achievement, achIndex) => (
-                        <div
-                          key={achIndex}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: '0.625rem',
-                            fontSize: '0.875rem',
-                          }}
-                        >
-                          <FiCheckCircle
-                            style={{
-                              width: '1rem',
-                              height: '1rem',
-                              color: '#22c55e',
-                              marginTop: '0.125rem',
-                              flexShrink: 0,
-                            }}
-                          />
-                          <span style={{ color: 'var(--color-foreground)' }}>{achievement}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            </ScrollReveal>
-          ))}
+                  </motion.div>
+                </div>
+              </ScrollReveal>
+            )
+          })}
         </div>
       </div>
 

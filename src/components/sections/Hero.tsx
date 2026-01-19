@@ -21,8 +21,8 @@ export function Hero() {
   }
 
   const socialLinks = [
-    { icon: FiLinkedin, href: social.linkedin, label: 'LinkedIn' },
-    { icon: FiMail, href: `mailto:${social.email}`, label: 'Email' },
+    { icon: FiLinkedin, href: social.linkedin, label: 'LinkedIn', color: 'var(--color-blue)' },
+    { icon: FiMail, href: `mailto:${social.email}`, label: 'Email', color: 'var(--color-coral)' },
   ]
 
   return (
@@ -38,42 +38,154 @@ export function Hero() {
         backgroundColor: 'var(--color-background)',
       }}
     >
-      {/* Animated background gradient */}
-      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-        <div
+      {/* Colorful floating shapes */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        {/* Coral blob - top left */}
+        <motion.div
+          className="animate-float"
           style={{
             position: 'absolute',
-            top: '-50%',
-            left: '-50%',
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)',
+            top: '10%',
+            left: '5%',
+            width: 'clamp(200px, 30vw, 400px)',
+            height: 'clamp(200px, 30vw, 400px)',
+            background: 'radial-gradient(circle, var(--color-coral) 0%, transparent 70%)',
             borderRadius: '50%',
-            filter: 'blur(60px)',
+            filter: 'blur(80px)',
+            opacity: 0.4,
+          }}
+          animate={{
+            scale: [1, 1.1, 1],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: 'easeInOut',
           }}
         />
-        <div
+
+        {/* Amber blob - top right */}
+        <motion.div
+          className="animate-float-reverse"
           style={{
             position: 'absolute',
-            bottom: '-50%',
-            right: '-50%',
-            width: '100%',
-            height: '100%',
-            background: 'radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%)',
+            top: '5%',
+            right: '10%',
+            width: 'clamp(150px, 25vw, 350px)',
+            height: 'clamp(150px, 25vw, 350px)',
+            background: 'radial-gradient(circle, var(--color-amber) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(70px)',
+            opacity: 0.35,
+          }}
+          animate={{
+            scale: [1, 1.15, 1],
+            y: [0, -30, 0],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+
+        {/* Teal blob - bottom left */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            bottom: '15%',
+            left: '15%',
+            width: 'clamp(180px, 28vw, 380px)',
+            height: 'clamp(180px, 28vw, 380px)',
+            background: 'radial-gradient(circle, var(--color-teal) 0%, transparent 70%)',
+            borderRadius: '50%',
+            filter: 'blur(75px)',
+            opacity: 0.35,
+          }}
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, -20, 0],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: 'easeInOut',
+            delay: 1,
+          }}
+        />
+
+        {/* Purple blob - bottom right */}
+        <motion.div
+          className="animate-pulse-soft"
+          style={{
+            position: 'absolute',
+            bottom: '20%',
+            right: '5%',
+            width: 'clamp(120px, 20vw, 280px)',
+            height: 'clamp(120px, 20vw, 280px)',
+            background: 'radial-gradient(circle, var(--color-purple) 0%, transparent 70%)',
             borderRadius: '50%',
             filter: 'blur(60px)',
+            opacity: 0.4,
           }}
+        />
+
+        {/* Decorative geometric shapes */}
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: '25%',
+            right: '20%',
+            width: '60px',
+            height: '60px',
+            border: '3px solid var(--color-amber)',
+            borderRadius: '12px',
+            opacity: 0.3,
+          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+        />
+
+        <motion.div
+          style={{
+            position: 'absolute',
+            bottom: '30%',
+            left: '25%',
+            width: '40px',
+            height: '40px',
+            backgroundColor: 'var(--color-teal)',
+            borderRadius: '50%',
+            opacity: 0.2,
+          }}
+          animate={{ y: [0, -15, 0], scale: [1, 1.2, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
+        <motion.div
+          style={{
+            position: 'absolute',
+            top: '60%',
+            right: '30%',
+            width: '30px',
+            height: '30px',
+            backgroundColor: 'var(--color-pink)',
+            opacity: 0.25,
+            transform: 'rotate(45deg)',
+          }}
+          animate={{ rotate: [45, 90, 45], scale: [1, 1.3, 1] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
 
-      {/* Grid pattern overlay */}
+      {/* Subtle dot pattern */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          opacity: 0.02,
-          backgroundImage: 'radial-gradient(var(--color-primary) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
+          opacity: 0.03,
+          backgroundImage: 'radial-gradient(var(--color-primary) 1.5px, transparent 1.5px)',
+          backgroundSize: '30px 30px',
         }}
       />
 
@@ -93,19 +205,29 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            style={{ marginBottom: '1rem' }}
+            style={{ marginBottom: '1.5rem' }}
           >
             <span
               style={{
-                display: 'inline-block',
-                padding: '0.5rem 1rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1.25rem',
                 borderRadius: '9999px',
-                backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                color: 'var(--color-accent)',
+                background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.15), rgba(245, 158, 11, 0.15))',
+                border: '1px solid rgba(255, 107, 107, 0.2)',
                 fontSize: '0.875rem',
-                fontWeight: 500,
+                fontWeight: 600,
+                color: 'var(--color-coral)',
               }}
             >
+              <span style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--color-teal)',
+                animation: 'pulse-soft 2s ease-in-out infinite',
+              }} />
               Available for opportunities
             </span>
           </motion.div>
@@ -115,11 +237,13 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             style={{
-              fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
-              fontWeight: 700,
+              fontSize: 'clamp(2.75rem, 10vw, 5.5rem)',
+              fontWeight: 800,
               color: 'var(--color-primary)',
               marginBottom: '1rem',
               fontFamily: 'var(--font-heading)',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.1,
             }}
           >
             Hi, I'm{' '}
@@ -131,10 +255,11 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             style={{
-              fontSize: 'clamp(1.25rem, 4vw, 1.875rem)',
+              fontSize: 'clamp(1.25rem, 4vw, 2rem)',
               color: 'var(--color-secondary)',
               marginBottom: '1.5rem',
               fontWeight: 500,
+              fontFamily: 'var(--font-heading)',
             }}
           >
             {title}
@@ -147,8 +272,9 @@ export function Hero() {
             style={{
               fontSize: 'clamp(1.125rem, 2vw, 1.25rem)',
               color: 'var(--color-muted-foreground)',
-              maxWidth: '42rem',
-              marginBottom: '2rem',
+              maxWidth: '38rem',
+              marginBottom: '2.5rem',
+              lineHeight: 1.7,
             }}
           >
             {tagline}
@@ -188,17 +314,23 @@ export function Hero() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  width: '3rem',
-                  height: '3rem',
-                  borderRadius: '0.75rem',
-                  backgroundColor: 'var(--color-muted)',
+                  width: '3.25rem',
+                  height: '3.25rem',
+                  borderRadius: '1rem',
+                  backgroundColor: 'var(--color-card)',
+                  border: '2px solid var(--color-border)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'var(--color-secondary)',
-                  transition: 'all 0.2s ease',
+                  color: link.color,
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                 }}
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(99, 102, 241, 0.1)' }}
+                whileHover={{
+                  scale: 1.1,
+                  borderColor: link.color,
+                  boxShadow: `0 8px 25px -5px ${link.color}33`,
+                }}
                 whileTap={{ scale: 0.95 }}
                 aria-label={link.label}
               >
@@ -234,10 +366,11 @@ export function Hero() {
             cursor: 'pointer',
             transition: 'color 0.2s ease',
           }}
+          whileHover={{ color: 'var(--color-coral)' }}
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <span style={{ fontSize: '0.875rem' }}>Scroll Down</span>
+          <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Scroll Down</span>
           <FiArrowDown style={{ width: '1.25rem', height: '1.25rem' }} />
         </motion.button>
       </motion.div>
