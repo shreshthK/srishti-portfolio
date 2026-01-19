@@ -1,0 +1,162 @@
+# ============================================================================
+# DOCKER ROLE - MAIN TASKS
+# ============================================================================
+# Installs and configures Docker on Amazon Linux 2023.
+#
+# Learning Resources:
+# - Docker on Amazon Linux: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/docker-basics.html
+# - Ansible Docker Module: https://docs.ansible.com/ansible/latest/collections/community/docker/
+# ============================================================================
+
+---
+# ----------------------------------------------------------------------------
+# Install Docker
+# ----------------------------------------------------------------------------
+
+- name: Install Docker
+  ansible.builtin.dnf:
+    name: docker
+    state: present
+  notify: Restart Docker
+
+- name: Ensure Docker service directory exists
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: '0755'
+
+# ----------------------------------------------------------------------------
+# Configure Docker Daemon
+# ----------------------------------------------------------------------------
+
+- name: Configure Docker daemon
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    mode: '0644'
+  notify: Restart Docker
+
+# ----------------------------------------------------------------------------
+# Start and Enable Docker
+# ----------------------------------------------------------------------------
+
+- name: Start and enable Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+    enabled: true
+    daemon_reload: true
+
+# ----------------------------------------------------------------------------
+# Configure User Access
+# ----------------------------------------------------------------------------
+
+- name: Add ec2-user to docker group
+  ansible.builtin.user:
+    name: ec2-user
+    groups: docker
+    append: true
+
+# ----------------------------------------------------------------------------
+# Install Docker Compose (Standalone)
+# ----------------------------------------------------------------------------
+
+- name: Check if Docker Compose is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/docker-compose
+  register: docker_compose_bin
+
+- name: Install Docker Compose
+  when: not docker_compose_bin.stat.exists
+  block:
+    - name: Download Docker Compose
+      ansible.builtin.get_url:
+        url: "https://github.com/docker/compose/releases/download/v{{ docker_compose_version | default('2.24.0') }}/docker-compose-linux-x86_64"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      register: compose_download
+      retries: 3
+      delay: 5
+      until: compose_download is succeeded
+
+- name: Verify Docker Compose installation
+  ansible.builtin.command:
+    cmd: docker-compose --version
+  changed_when: false
+  register: compose_version
+
+- name: Display Docker Compose version
+  ansible.builtin.debug:
+    msg: "Docker Compose: {{ compose_version.stdout }}"
+
+# ----------------------------------------------------------------------------
+# Install Python Docker SDK (for Ansible modules)
+# ----------------------------------------------------------------------------
+
+- name: Install Python pip
+  ansible.builtin.dnf:
+    name: python3-pip
+    state: present
+
+- name: Install Docker SDK for Python
+  ansible.builtin.pip:
+    name:
+      - docker
+      - docker-compose
+    state: present
+    extra_args: --ignore-installed
+
+# ----------------------------------------------------------------------------
+# Create Application Directory
+# ----------------------------------------------------------------------------
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: /opt/portfolio
+    state: directory
+    owner: ec2-user
+    group: ec2-user
+    mode: '0755'
+
+# ----------------------------------------------------------------------------
+# ECR Login Script
+# ----------------------------------------------------------------------------
+
+- name: Install cron (required for cron jobs)
+  ansible.builtin.dnf:
+    name: cronie
+    state: present
+
+- name: Ensure cron service is running
+  ansible.builtin.systemd:
+    name: crond
+    state: started
+    enabled: true
+
+- name: Create ECR login script
+  ansible.builtin.template:
+    src: ecr-login.sh.j2
+    dest: /usr/local/bin/ecr-login.sh
+    mode: '0755'
+
+- name: Setup ECR login cron job
+  ansible.builtin.cron:
+    name: "ECR Token Refresh"
+    minute: "0"
+    hour: "*/6"
+    job: "/usr/local/bin/ecr-login.sh > /dev/null 2>&1"
+    user: root
+
+# ----------------------------------------------------------------------------
+# Verify Installation
+# ----------------------------------------------------------------------------
+
+- name: Verify Docker is working
+  ansible.builtin.command:
+    cmd: docker info
+  changed_when: false
+  register: docker_info
+
+- name: Display Docker info
+  ansible.builtin.debug:
+    msg: "Docker version: {{ docker_info.stdout_lines[0] | default('Unknown') }}"

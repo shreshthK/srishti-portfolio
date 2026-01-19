@@ -1,0 +1,13 @@
+# ============================================================================
+# APP ROLE - HANDLERS
+# ============================================================================
+
+---
+- name: Reload Systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart Portfolio Service
+  ansible.builtin.systemd:
+    name: portfolio
+    state: restarted

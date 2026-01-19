@@ -1,0 +1,19 @@
+# ============================================================================
+# NGINX ROLE - DEFAULT VARIABLES
+# ============================================================================
+
+---
+# Worker processes (auto = number of CPU cores)
+nginx_worker_processes: auto
+
+# Worker connections per process
+nginx_worker_connections: 1024
+
+# Application port
+app_port: 3000
+
+# Domain name (leave empty for IP-only access)
+domain_name: ""
+
+# SSL email for Let's Encrypt
+ssl_email: ""

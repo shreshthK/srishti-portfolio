@@ -1,0 +1,144 @@
+# ============================================================================
+# NGINX ROLE - MAIN TASKS
+# ============================================================================
+# Installs and configures Nginx as a reverse proxy for the portfolio app.
+#
+# Learning Resources:
+# - Nginx Reverse Proxy: https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/
+# - Nginx on Amazon Linux: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-LAMP.html
+# ============================================================================
+
+---
+# ----------------------------------------------------------------------------
+# Install Nginx
+# ----------------------------------------------------------------------------
+
+- name: Install Nginx
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+
+# ----------------------------------------------------------------------------
+# Configure Nginx
+# ----------------------------------------------------------------------------
+
+- name: Create Nginx configuration directory
+  ansible.builtin.file:
+    path: /etc/nginx/conf.d
+    state: directory
+    mode: '0755'
+
+- name: Configure main Nginx settings
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+    validate: nginx -t -c %s
+  notify: Reload Nginx
+
+- name: Configure portfolio site
+  ansible.builtin.template:
+    src: portfolio.conf.j2
+    dest: /etc/nginx/conf.d/portfolio.conf
+    mode: '0644'
+    validate: sh -c "nginx -t && test -f %s"
+  notify: Reload Nginx
+
+- name: Remove default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/conf.d/default.conf
+    state: absent
+  notify: Reload Nginx
+
+# ----------------------------------------------------------------------------
+# SSL/TLS Configuration (Optional)
+# ----------------------------------------------------------------------------
+# This section sets up Let's Encrypt SSL certificates.
+# Only enabled when domain_name is set.
+
+- name: Install Certbot for Let's Encrypt
+  when: domain_name | length > 0
+  ansible.builtin.dnf:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+
+# Note: Running certbot requires the domain to be pointing to this server.
+# This should be done manually the first time:
+# sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+#
+# Or use this task for non-interactive:
+# - name: Obtain SSL certificate
+#   when: domain_name | length > 0 and ssl_email | length > 0
+#   ansible.builtin.command:
+#     cmd: >
+#       certbot --nginx
+#       -d {{ domain_name }}
+#       -d www.{{ domain_name }}
+#       --non-interactive
+#       --agree-tos
+#       --email {{ ssl_email }}
+#     creates: /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem
+
+- name: Setup Certbot auto-renewal cron
+  when: domain_name | length > 0
+  ansible.builtin.cron:
+    name: "Certbot renewal"
+    minute: "0"
+    hour: "12"
+    job: "/usr/bin/certbot renew --quiet"
+    user: root
+
+# ----------------------------------------------------------------------------
+# Start and Enable Nginx
+# ----------------------------------------------------------------------------
+
+- name: Start and enable Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: true
+    daemon_reload: true
+
+# ----------------------------------------------------------------------------
+# Firewall Configuration (firewalld)
+# ----------------------------------------------------------------------------
+
+- name: Check if firewalld is installed
+  ansible.builtin.command:
+    cmd: which firewall-cmd
+  register: firewalld_check
+  changed_when: false
+  failed_when: false
+
+- name: Configure firewall for HTTP/HTTPS
+  when: firewalld_check.rc == 0
+  block:
+    - name: Allow HTTP through firewall
+      ansible.posix.firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: true
+
+    - name: Allow HTTPS through firewall
+      ansible.posix.firewalld:
+        service: https
+        permanent: true
+        state: enabled
+        immediate: true
+
+# ----------------------------------------------------------------------------
+# Verify Nginx Configuration
+# ----------------------------------------------------------------------------
+
+- name: Test Nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  changed_when: false
+  register: nginx_test
+
+- name: Display Nginx test result
+  ansible.builtin.debug:
+    msg: "{{ nginx_test.stderr }}"

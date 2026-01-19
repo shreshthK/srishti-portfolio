@@ -1,0 +1,65 @@
+# ============================================================================
+# CLOUDWATCH ROLE - MAIN TASKS
+# ============================================================================
+# Installs and configures the CloudWatch agent for monitoring and logging.
+#
+# Learning Resources:
+# - CloudWatch Agent: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
+# - CloudWatch Logs: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/
+# ============================================================================
+
+---
+# ----------------------------------------------------------------------------
+# Install CloudWatch Agent
+# ----------------------------------------------------------------------------
+
+- name: Install CloudWatch Agent
+  ansible.builtin.dnf:
+    name: amazon-cloudwatch-agent
+    state: present
+
+# ----------------------------------------------------------------------------
+# Configure CloudWatch Agent
+# ----------------------------------------------------------------------------
+
+- name: Create CloudWatch Agent configuration
+  ansible.builtin.template:
+    src: amazon-cloudwatch-agent.json.j2
+    dest: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+    mode: '0644'
+  notify: Restart CloudWatch Agent
+
+# ----------------------------------------------------------------------------
+# Start and Enable CloudWatch Agent
+# ----------------------------------------------------------------------------
+
+- name: Configure CloudWatch Agent
+  ansible.builtin.command:
+    cmd: >
+      /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl
+      -a fetch-config
+      -m ec2
+      -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+      -s
+  register: cw_config
+  changed_when: "'Successfully fetched' in cw_config.stdout"
+
+- name: Start and enable CloudWatch Agent
+  ansible.builtin.systemd:
+    name: amazon-cloudwatch-agent
+    state: started
+    enabled: true
+
+# ----------------------------------------------------------------------------
+# Verify CloudWatch Agent
+# ----------------------------------------------------------------------------
+
+- name: Check CloudWatch Agent status
+  ansible.builtin.command:
+    cmd: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a status
+  changed_when: false
+  register: cw_status
+
+- name: Display CloudWatch Agent status
+  ansible.builtin.debug:
+    msg: "{{ cw_status.stdout }}"

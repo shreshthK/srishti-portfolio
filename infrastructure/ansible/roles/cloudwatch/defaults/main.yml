@@ -1,0 +1,16 @@
+# ============================================================================
+# CLOUDWATCH ROLE - DEFAULT VARIABLES
+# ============================================================================
+
+---
+# CloudWatch log group name
+cloudwatch_log_group: "/portfolio/prod"
+
+# CloudWatch custom namespace for metrics
+cloudwatch_namespace: "Portfolio"
+
+# Metrics collection interval in seconds
+cloudwatch_metrics_interval: 60
+
+# Log retention in days
+cloudwatch_log_retention: 30

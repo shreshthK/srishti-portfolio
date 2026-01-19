@@ -1,0 +1,84 @@
+# ============================================================================
+# TERRAFORM VARIABLES FILE (EXAMPLE)
+# ============================================================================
+# This file contains example values for Terraform variables.
+#
+# SETUP INSTRUCTIONS:
+# 1. Copy this file: cp terraform.tfvars.example terraform.tfvars
+# 2. Edit terraform.tfvars with your values
+# 3. terraform.tfvars is gitignored - never commit it!
+#
+# The actual terraform.tfvars file should contain sensitive information
+# like your specific key name, domain, etc.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# General Settings
+# ----------------------------------------------------------------------------
+
+# Project name - used in resource naming
+# Keep it short, lowercase, with hyphens only
+project_name = "portfolio"
+
+# Environment (dev, staging, prod)
+environment = "prod"
+
+# ----------------------------------------------------------------------------
+# AWS Settings
+# ----------------------------------------------------------------------------
+
+# AWS region to deploy resources
+# TODO: Choose your preferred region
+aws_region = "us-east-1"
+
+# ----------------------------------------------------------------------------
+# EC2 Settings
+# ----------------------------------------------------------------------------
+
+# EC2 key pair name
+# TODO: Create a key pair in AWS Console and enter its name here
+# aws ec2 create-key-pair --key-name portfolio-key --query 'KeyMaterial' --output text > portfolio-key.pem
+ec2_key_name = "your-key-pair-name"
+
+# Instance type (t2.micro is free tier eligible)
+instance_type = "t2.micro"
+
+# CIDR blocks allowed to SSH
+# TODO: Replace with your IP for better security
+# Find your IP: curl ifconfig.me
+# For GitHub Actions, you may need to allow 0.0.0.0/0 or use a bastion
+allowed_ssh_cidr_blocks = ["0.0.0.0/0"]  # CHANGE THIS IN PRODUCTION!
+
+# ----------------------------------------------------------------------------
+# VPC Settings
+# ----------------------------------------------------------------------------
+
+# VPC CIDR block
+vpc_cidr = "10.0.0.0/16"
+
+# Public subnet CIDR
+public_subnet_cidr = "10.0.1.0/24"
+
+# ----------------------------------------------------------------------------
+# ECR Settings
+# ----------------------------------------------------------------------------
+
+# Number of images to retain in ECR
+ecr_image_retention_count = 10
+
+# ----------------------------------------------------------------------------
+# Domain Settings (Optional)
+# ----------------------------------------------------------------------------
+# Leave empty or false if you don't have a domain yet
+
+# Your domain name
+# TODO: Set this after registering/configuring your domain
+domain_name = ""
+
+# Whether to create DNS records
+# Set to true only when you have a hosted zone ready
+create_dns_records = false
+
+# Route 53 Hosted Zone ID
+# TODO: Get this from Route 53 console after domain setup
+route53_zone_id = ""

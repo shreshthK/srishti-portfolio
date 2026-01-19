@@ -1,0 +1,92 @@
+# ============================================================================
+# APP ROLE - MAIN TASKS
+# ============================================================================
+# Sets up the application deployment environment and helper scripts.
+#
+# This role prepares the system for deploying the portfolio application.
+# Actual deployment is handled by the deploy.yml playbook.
+# ============================================================================
+
+---
+# ----------------------------------------------------------------------------
+# Create Application Directory Structure
+# ----------------------------------------------------------------------------
+
+- name: Create application directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: ec2-user
+    group: ec2-user
+    mode: '0755'
+  loop:
+    - /opt/portfolio
+    - /opt/portfolio/scripts
+    - /opt/portfolio/backups
+
+# ----------------------------------------------------------------------------
+# Create Deployment Script
+# ----------------------------------------------------------------------------
+
+- name: Create deployment script
+  ansible.builtin.template:
+    src: deploy.sh.j2
+    dest: /opt/portfolio/scripts/deploy.sh
+    owner: ec2-user
+    group: ec2-user
+    mode: '0755'
+
+# ----------------------------------------------------------------------------
+# Create Rollback Script
+# ----------------------------------------------------------------------------
+
+- name: Create rollback script
+  ansible.builtin.template:
+    src: rollback.sh.j2
+    dest: /opt/portfolio/scripts/rollback.sh
+    owner: ec2-user
+    group: ec2-user
+    mode: '0755'
+
+# ----------------------------------------------------------------------------
+# Create Health Check Script
+# ----------------------------------------------------------------------------
+
+- name: Create health check script
+  ansible.builtin.template:
+    src: health-check.sh.j2
+    dest: /opt/portfolio/scripts/health-check.sh
+    owner: ec2-user
+    group: ec2-user
+    mode: '0755'
+
+# ----------------------------------------------------------------------------
+# Create Symlinks for Convenience
+# ----------------------------------------------------------------------------
+
+- name: Create symlink to deploy script
+  ansible.builtin.file:
+    src: /opt/portfolio/scripts/deploy.sh
+    dest: /opt/portfolio/deploy.sh
+    state: link
+
+# ----------------------------------------------------------------------------
+# Create Systemd Service (Optional - for auto-restart)
+# ----------------------------------------------------------------------------
+
+- name: Create systemd service for portfolio app
+  ansible.builtin.template:
+    src: portfolio.service.j2
+    dest: /etc/systemd/system/portfolio.service
+    mode: '0644'
+  notify: Reload Systemd
+
+# ----------------------------------------------------------------------------
+# Configure Log Rotation for Application Logs
+# ----------------------------------------------------------------------------
+
+- name: Configure application log rotation
+  ansible.builtin.template:
+    src: logrotate.conf.j2
+    dest: /etc/logrotate.d/portfolio
+    mode: '0644'

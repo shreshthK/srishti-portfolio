@@ -1,0 +1,98 @@
+# ============================================================================
+# AWS EC2 DYNAMIC INVENTORY
+# ============================================================================
+# This inventory file uses the aws_ec2 plugin to automatically discover
+# EC2 instances based on tags and filters.
+#
+# Prerequisites:
+# - boto3 Python package: pip install boto3
+# - AWS credentials configured (aws configure or environment variables)
+#
+# Learning Resources:
+# - AWS EC2 Inventory Plugin: https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html
+#
+# Usage:
+#   ansible-inventory -i inventory/aws_ec2.yml --list   # List all hosts
+#   ansible-inventory -i inventory/aws_ec2.yml --graph  # Show inventory tree
+# ============================================================================
+
+plugin: amazon.aws.aws_ec2
+
+# ----------------------------------------------------------------------------
+# AWS Configuration
+# ----------------------------------------------------------------------------
+# TODO: Update this to match your Terraform configuration
+
+# AWS region(s) to search for instances
+regions:
+  - us-east-1  # TODO: Change to your region
+
+# ----------------------------------------------------------------------------
+# Filters
+# ----------------------------------------------------------------------------
+# Only include instances that match these criteria
+# This ensures we only target our portfolio instances
+
+filters:
+  # Only running instances
+  instance-state-name: running
+
+  # Only instances with our project tag
+  # This matches the tags set by Terraform
+  "tag:Project": portfolio
+  "tag:Environment": prod
+
+# ----------------------------------------------------------------------------
+# Host Variables
+# ----------------------------------------------------------------------------
+# Add these variables to all discovered hosts
+
+hostvar_filters:
+  # Use the public IP for connection
+  ansible_host: public_ip_address
+
+# Compose additional variables
+compose:
+  # Use the public IP address for SSH connections
+  ansible_host: public_ip_address
+
+  # Use the instance ID as a unique identifier
+  instance_id: instance_id
+
+  # Extract tags for use in playbooks
+  ec2_tags: tags
+
+# ----------------------------------------------------------------------------
+# Grouping
+# ----------------------------------------------------------------------------
+# Organize hosts into groups based on their attributes
+
+keyed_groups:
+  # Group by the 'Environment' tag (e.g., 'tag_Environment_prod')
+  - key: tags.Environment
+    prefix: env
+    separator: "_"
+
+  # Group by the 'Project' tag (e.g., 'tag_Project_portfolio')
+  - key: tags.Project
+    prefix: project
+    separator: "_"
+
+  # Group by instance type (e.g., 'instance_type_t2_micro')
+  - key: instance_type
+    prefix: instance_type
+    separator: "_"
+
+# Create an 'all' group alias for convenience
+groups:
+  portfolio_servers: "'portfolio' in tags.Project"
+
+# ----------------------------------------------------------------------------
+# Caching (Optional)
+# ----------------------------------------------------------------------------
+# Cache the inventory for faster subsequent runs
+
+cache: true
+cache_plugin: jsonfile
+cache_connection: /tmp/ansible_aws_inventory_cache
+cache_timeout: 300  # 5 minutes

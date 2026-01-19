@@ -1,0 +1,19 @@
+# ============================================================================
+# DOCKER ROLE - DEFAULT VARIABLES
+# ============================================================================
+# These are default values that can be overridden in playbooks or inventory.
+# ============================================================================
+
+---
+# Docker Compose version to install
+docker_compose_version: "2.24.0"
+
+# Docker log settings
+docker_log_max_size: "10m"
+docker_log_max_file: "3"
+
+# AWS region for ECR
+aws_region: "us-east-1"
+
+# ECR repository URL (should be set in inventory or playbook)
+ecr_repository_url: ""

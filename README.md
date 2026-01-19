@@ -74,6 +74,54 @@ Run ESLint to check for code quality issues:
 npm run lint
 ```
 
+## 🚀 AWS Deployment
+
+This project includes a complete CI/CD pipeline for deploying to AWS EC2.
+
+### Infrastructure Overview
+
+- **Terraform**: Infrastructure as Code for AWS resources (VPC, EC2, ECR, IAM)
+- **Ansible**: Configuration management for EC2 instance setup
+- **GitHub Actions**: CI/CD pipelines for automated testing and deployment
+- **AWS Services**: EC2, ECR, CloudWatch, Route 53
+
+### Quick Start
+
+See the full deployment guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+```bash
+# 1. Configure AWS credentials
+aws configure
+
+# 2. Deploy infrastructure
+cd infrastructure/terraform
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars with your values
+terraform init && terraform apply
+
+# 3. Configure EC2 with Ansible
+cd ../ansible
+ansible-playbook playbooks/setup.yml
+
+# 4. Set GitHub Secrets and push to deploy
+```
+
+### Infrastructure Files
+
+```
+infrastructure/
+├── terraform/          # AWS infrastructure as code
+│   ├── main.tf         # Provider configuration
+│   ├── vpc.tf          # VPC, subnets, internet gateway
+│   ├── ec2.tf          # EC2 instance and Elastic IP
+│   ├── ecr.tf          # Container registry
+│   ├── iam.tf          # IAM roles and policies
+│   └── cloudwatch.tf   # Monitoring and logging
+├── ansible/            # Configuration management
+│   ├── playbooks/      # Setup and deploy playbooks
+│   └── roles/          # Docker, Nginx, CloudWatch roles
+```
+
 ## 🐳 Docker Deployment
 
 ### Using Docker Compose (Recommended)

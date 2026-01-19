@@ -1,0 +1,47 @@
+# ============================================================================
+# STATIC INVENTORY FILE (ALTERNATIVE TO DYNAMIC)
+# ============================================================================
+# Use this file if you prefer static inventory over AWS dynamic inventory.
+#
+# SETUP:
+# 1. Copy this file: cp hosts.example hosts
+# 2. Update the IP address with your EC2's Elastic IP
+# 3. Update ansible.cfg to use: inventory = inventory/hosts
+#
+# The 'hosts' file is gitignored for security.
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Portfolio Servers
+# ----------------------------------------------------------------------------
+[portfolio_servers]
+# TODO: Replace with your EC2 Elastic IP from terraform output
+portfolio ansible_host=YOUR_EC2_ELASTIC_IP
+
+# ----------------------------------------------------------------------------
+# Group Variables
+# ----------------------------------------------------------------------------
+[portfolio_servers:vars]
+# SSH user for Amazon Linux 2023
+ansible_user=ec2-user
+
+# SSH private key path
+# TODO: Update to your key location
+ansible_ssh_private_key_file=~/.ssh/portfolio-key.pem
+
+# Python interpreter (Amazon Linux 2023 uses Python 3)
+ansible_python_interpreter=/usr/bin/python3
+
+# Disable host key checking for new hosts
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+# ----------------------------------------------------------------------------
+# All Hosts Variables
+# ----------------------------------------------------------------------------
+[all:vars]
+# AWS Region (used by some roles)
+aws_region=us-east-1
+
+# ECR Repository URL (from terraform output)
+# TODO: Update after running terraform apply
+ecr_repository_url=YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/portfolio-prod-app

@@ -27,3 +27,32 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ansible
+*.retry
+inventory/hosts
+!inventory/hosts.example
+!inventory/aws_ec2.yml
+
+# SSH Keys
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# AWS credentials
+.aws/

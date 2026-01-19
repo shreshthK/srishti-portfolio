@@ -1,0 +1,109 @@
+{
+  "agent": {
+    "metrics_collection_interval": {{ cloudwatch_metrics_interval | default(60) }},
+    "run_as_user": "root",
+    "logfile": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log"
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/messages",
+            "log_group_name": "{{ cloudwatch_log_group | default('/portfolio/prod') }}",
+            "log_stream_name": "{instance_id}/messages",
+            "retention_in_days": {{ cloudwatch_log_retention | default(30) }},
+            "timezone": "UTC"
+          },
+          {
+            "file_path": "/var/log/nginx/access.log",
+            "log_group_name": "{{ cloudwatch_log_group | default('/portfolio/prod') }}",
+            "log_stream_name": "{instance_id}/nginx-access",
+            "retention_in_days": {{ cloudwatch_log_retention | default(30) }},
+            "timezone": "UTC"
+          },
+          {
+            "file_path": "/var/log/nginx/error.log",
+            "log_group_name": "{{ cloudwatch_log_group | default('/portfolio/prod') }}",
+            "log_stream_name": "{instance_id}/nginx-error",
+            "retention_in_days": {{ cloudwatch_log_retention | default(30) }},
+            "timezone": "UTC"
+          },
+          {
+            "file_path": "/var/log/user-data.log",
+            "log_group_name": "{{ cloudwatch_log_group | default('/portfolio/prod') }}",
+            "log_stream_name": "{instance_id}/user-data",
+            "retention_in_days": {{ cloudwatch_log_retention | default(30) }},
+            "timezone": "UTC"
+          }
+        ]
+      }
+    }
+  },
+  "metrics": {
+    "namespace": "{{ cloudwatch_namespace | default('Portfolio') }}",
+    "metrics_collected": {
+      "cpu": {
+        "measurement": [
+          "cpu_usage_idle",
+          "cpu_usage_user",
+          "cpu_usage_system"
+        ],
+        "metrics_collection_interval": {{ cloudwatch_metrics_interval | default(60) }},
+        "totalcpu": true
+      },
+      "disk": {
+        "measurement": [
+          "used_percent",
+          "inodes_free"
+        ],
+        "metrics_collection_interval": {{ cloudwatch_metrics_interval | default(60) }},
+        "resources": [
+          "/"
+        ]
+      },
+      "diskio": {
+        "measurement": [
+          "read_bytes",
+          "write_bytes",
+          "reads",
+          "writes"
+        ],
+        "metrics_collection_interval": {{ cloudwatch_metrics_interval | default(60) }},
+        "resources": [
+          "*"
+        ]
+      },
+      "mem": {
+        "measurement": [
+          "mem_used_percent",
+          "mem_available_percent"
+        ],
+        "metrics_collection_interval": {{ cloudwatch_metrics_interval | default(60) }}
+      },
+      "net": {
+        "measurement": [
+          "bytes_sent",
+          "bytes_recv",
+          "packets_sent",
+          "packets_recv"
+        ],
+        "metrics_collection_interval": {{ cloudwatch_metrics_interval | default(60) }},
+        "resources": [
+          "*"
+        ]
+      },
+      "netstat": {
+        "measurement": [
+          "tcp_established",
+          "tcp_time_wait"
+        ],
+        "metrics_collection_interval": {{ cloudwatch_metrics_interval | default(60) }}
+      }
+    },
+    "append_dimensions": {
+      "InstanceId": "${aws:InstanceId}",
+      "AutoScalingGroupName": "${aws:AutoScalingGroupName}"
+    }
+  }
+}
