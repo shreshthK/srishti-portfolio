@@ -2,15 +2,17 @@
 # CD WORKFLOW - CONTINUOUS DEPLOYMENT
 # ============================================================================
 # This workflow deploys the application to AWS EC2 when code is pushed to main.
-# It builds a Docker image, pushes to ECR, and deploys via SSH.
+# It builds a Docker image, pushes to ECR, and deploys via AWS SSM.
 #
 # REQUIRED SECRETS (GitHub Repository Settings -> Secrets and variables -> Actions):
 # - AWS_ACCESS_KEY_ID: IAM user access key for GitHub Actions
 # - AWS_SECRET_ACCESS_KEY: IAM user secret key
 # - AWS_REGION: AWS region (e.g., us-east-1)
 # - ECR_REPOSITORY: Full ECR repository URL
-# - EC2_HOST: EC2 Elastic IP address
-# - EC2_SSH_KEY: Private SSH key (contents of .pem file)
+# - EC2_INSTANCE_ID: EC2 instance ID (e.g., i-03272cfdede265459)
+# - EC2_HOST: EC2 public IP (for health check verification)
+#
+# NOTE: This workflow uses AWS SSM for secure deployment - no SSH keys or open ports required.
 #
 # Learning Resources:
 # - GitHub Actions Secrets: https://docs.github.com/en/actions/security-guides/encrypted-secrets
@@ -121,7 +123,7 @@ jobs:
           echo "Digest: ${{ steps.build.outputs.digest }}"
 
   # --------------------------------------------------------------------------
-  # Deploy to EC2
+  # Deploy to EC2 via SSM
   # --------------------------------------------------------------------------
   deploy:
     name: Deploy to EC2
@@ -130,82 +132,83 @@ jobs:
     environment: production
 
     steps:
-      - name: Configure SSH
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to EC2 via SSM
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+              "set -e",
+              "echo \"==========================================\"",
+              "echo \"Starting deployment...\"",
+              "echo \"==========================================\"",
+              "",
+              "echo \"Logging into ECR...\"",
+              "aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}",
+              "",
+              "echo \"Pulling new image...\"",
+              "docker pull ${{ env.ECR_REPOSITORY }}:latest",
+              "",
+              "echo \"Stopping old container...\"",
+              "docker stop portfolio 2>/dev/null || true",
+              "docker rm portfolio 2>/dev/null || true",
+              "",
+              "echo \"Starting new container...\"",
+              "docker run -d --name portfolio --restart unless-stopped -p 3000:80 --health-cmd=\"curl -f http://localhost:80/health || exit 1\" --health-interval=30s --health-timeout=10s --health-retries=3 --health-start-period=10s ${{ env.ECR_REPOSITORY }}:latest",
+              "",
+              "echo \"Waiting for container to be healthy...\"",
+              "sleep 10",
+              "for i in 1 2 3 4 5 6 7 8 9 10 11 12; do if curl -sf http://localhost:3000/health > /dev/null 2>&1; then echo \"Health check passed!\"; break; fi; echo \"Waiting... ($i/12)\"; sleep 5; done",
+              "",
+              "if curl -sf http://localhost:3000/health > /dev/null 2>&1; then echo \"==========================================\" && echo \"Deployment successful!\" && echo \"==========================================\" && docker ps | grep portfolio; else echo \"==========================================\" && echo \"Deployment may have failed!\" && echo \"==========================================\" && docker logs portfolio --tail 50 && exit 1; fi",
+              "",
+              "docker image prune -f"
+            ]' \
+            --timeout-seconds 300 \
+            --query 'Command.CommandId' \
+            --output text)
 
-      - name: Deploy to EC2
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          ECR_REPO: ${{ env.ECR_REPOSITORY }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ec2-user@$EC2_HOST << 'ENDSSH'
-            set -e
-            echo "=========================================="
-            echo "Starting deployment..."
-            echo "=========================================="
+          echo "SSM Command ID: $COMMAND_ID"
 
-            # Login to ECR
-            echo "Logging into ECR..."
-            aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
-              docker login --username AWS --password-stdin ${{ env.ECR_REPOSITORY }}
+          # Wait for command to complete
+          echo "Waiting for deployment to complete..."
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" || true
 
-            # Pull new image
-            echo "Pulling new image..."
-            docker pull ${{ env.ECR_REPOSITORY }}:latest
+          # Get command result
+          RESULT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+            --query '[Status, StatusDetails]' \
+            --output text)
 
-            # Stop and remove old container
-            echo "Stopping old container..."
-            docker stop portfolio 2>/dev/null || true
-            docker rm portfolio 2>/dev/null || true
+          echo "Command result: $RESULT"
 
-            # Start new container
-            echo "Starting new container..."
-            docker run -d \
-              --name portfolio \
-              --restart unless-stopped \
-              -p 3000:80 \
-              --health-cmd="curl -f http://localhost:80/health || exit 1" \
-              --health-interval=30s \
-              --health-timeout=10s \
-              --health-retries=3 \
-              --health-start-period=10s \
-              ${{ env.ECR_REPOSITORY }}:latest
+          # Get output
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+            --query 'StandardOutputContent' \
+            --output text
 
-            # Wait for health check
-            echo "Waiting for container to be healthy..."
-            sleep 10
-            for i in {1..12}; do
-              if curl -sf http://localhost:3000/health > /dev/null 2>&1; then
-                echo "Health check passed!"
-                break
-              fi
-              echo "Waiting... ($i/12)"
-              sleep 5
-            done
-
-            # Final verification
-            if curl -sf http://localhost:3000/health > /dev/null 2>&1; then
-              echo "=========================================="
-              echo "Deployment successful!"
-              echo "=========================================="
-              docker ps | grep portfolio
-            else
-              echo "=========================================="
-              echo "Deployment may have failed!"
-              echo "=========================================="
-              docker logs portfolio --tail 50
-              exit 1
-            fi
-
-            # Clean up old images
-            docker image prune -f
-          ENDSSH
+          # Check for failure
+          if echo "$RESULT" | grep -q "Failed"; then
+            echo "Deployment failed. Error output:"
+            aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+              --query 'StandardErrorContent' \
+              --output text
+            exit 1
+          fi
 
       - name: Verify deployment
         run: |
