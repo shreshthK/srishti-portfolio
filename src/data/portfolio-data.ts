@@ -16,7 +16,7 @@ Known for building strong relationships with both technical teams and business l
 
   social: {
     linkedin: 'https://linkedin.com/in/srishti-rawat-29061996',
-    email: 'srish.rwt29@gmail.com',
+    email: 'srish.rwt29@gmail.com'
   },
 
   skills: {

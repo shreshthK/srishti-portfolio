@@ -1,4 +1,4 @@
-import { FiGithub, FiLinkedin, FiMail, FiHeart } from 'react-icons/fi'
+import { FiLinkedin, FiMail, FiHeart } from 'react-icons/fi'
 import { portfolioData } from '../../data/portfolio-data'
 
 export function Footer() {
@@ -6,7 +6,6 @@ export function Footer() {
   const { social } = portfolioData
 
   const socialLinks = [
-    { icon: FiGithub, href: social.github, label: 'GitHub' },
     { icon: FiLinkedin, href: social.linkedin, label: 'LinkedIn' },
     { icon: FiMail, href: `mailto:${social.email}`, label: 'Email' },
   ]
