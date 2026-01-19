@@ -6,23 +6,36 @@ interface CardProps {
   className?: string
   hover?: boolean
   style?: CSSProperties
+  accentColor?: string
 }
 
-export function Card({ children, className = '', hover = true, style }: CardProps) {
+export function Card({ children, className = '', hover = true, style, accentColor }: CardProps) {
   const cardStyles: CSSProperties = {
     backgroundColor: 'var(--color-card)',
-    border: '1px solid var(--color-border)',
-    borderRadius: '0.75rem',
-    padding: '1.5rem',
+    border: '2px solid var(--color-border)',
+    borderRadius: '1.25rem',
+    padding: '1.75rem',
     transition: 'all 0.3s ease',
+    position: 'relative',
+    overflow: 'hidden',
     ...style,
   }
+
+  const hoverAnimation = hover
+    ? {
+        y: -6,
+        borderColor: accentColor || 'var(--color-coral)',
+        boxShadow: accentColor
+          ? `0 20px 40px -15px ${accentColor}25`
+          : '0 20px 40px -15px rgba(255, 107, 107, 0.2)',
+      }
+    : undefined
 
   return (
     <motion.div
       className={className}
       style={cardStyles}
-      whileHover={hover ? { y: -4, borderColor: 'rgba(99, 102, 241, 0.5)' } : undefined}
+      whileHover={hoverAnimation}
     >
       {children}
     </motion.div>
