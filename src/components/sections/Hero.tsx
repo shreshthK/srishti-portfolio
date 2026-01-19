@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { FiArrowDown, FiGithub, FiLinkedin, FiMail } from 'react-icons/fi'
+import { FiArrowDown, FiLinkedin, FiMail } from 'react-icons/fi'
 import { Button } from '../ui/Button'
 import { portfolioData } from '../../data/portfolio-data'
 
