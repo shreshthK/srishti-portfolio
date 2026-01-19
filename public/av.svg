@@ -1,8 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect x="4" y="4" width="56" height="56" rx="16" fill="#2563eb" />
-  
-  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" 
-        fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="36">
+  <defs>
+    <!-- Main gradient for background -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B"/>
+      <stop offset="50%" style="stop-color:#F59E0B"/>
+      <stop offset="100%" style="stop-color:#14B8A6"/>
+    </linearGradient>
+
+    <!-- Text gradient -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#FEF3E2"/>
+    </linearGradient>
+
+    <!-- Subtle inner glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background with gradient -->
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bgGradient)"/>
+
+  <!-- Decorative circle accent -->
+  <circle cx="52" cy="12" r="6" fill="#A78BFA" opacity="0.4"/>
+  <circle cx="12" cy="52" r="4" fill="#F472B6" opacity="0.3"/>
+
+  <!-- Main text with glow -->
+  <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle"
+        fill="url(#textGradient)" font-family="sans-serif" font-weight="bold" font-size="34"
+        filter="url(#glow)">
     SR
   </text>
 </svg>
