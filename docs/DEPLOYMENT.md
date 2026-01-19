@@ -484,48 +484,48 @@ Go to your GitHub repository: **Settings > Secrets and variables > Actions**
 
 ### Step 5.2: Update Terraform for DNS
 
-- [ ] Edit `infrastructure/terraform/terraform.tfvars`:
+- [x] Edit `infrastructure/terraform/terraform.tfvars`:
   ```hcl
   domain_name        = "yourdomain.com"
   create_dns_records = true
   route53_zone_id    = "YOUR_ZONE_ID"
   ```
 
-- [ ] Apply DNS changes:
+- [x] Apply DNS changes:
   ```bash
   cd infrastructure/terraform
   terraform apply
   ```
 
-- [ ] Verify DNS (may take a few minutes):
+- [x] Verify DNS (may take a few minutes):
   ```bash
-  dig yourdomain.com
+  sr yourdomain.com
   ```
   Should return your EC2 Elastic IP
 
 ### Step 5.3: Set Up SSL with Let's Encrypt
 
-- [ ] SSH into EC2:
+- [x] SSH into EC2:
   ```bash
   ssh -i ~/.ssh/portfolio-key.pem ec2-user@YOUR_EC2_IP
   ```
 
-- [ ] Run Certbot:
+- [x] Run Certbot:
   ```bash
   sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
   ```
 
-- [ ] Follow prompts:
-  - [ ] Enter email for renewal notices
-  - [ ] Agree to terms of service
-  - [ ] Choose to redirect HTTP to HTTPS (recommended)
+- [x] Follow prompts:
+  - [x] Enter email for renewal notices
+  - [x] Agree to terms of service
+  - [x] Choose to redirect HTTP to HTTPS (recommended)
 
-- [ ] Exit SSH:
+- [x] Exit SSH:
   ```bash
   exit
   ```
 
-- [ ] Verify HTTPS:
+- [x] Verify HTTPS:
   ```bash
   curl https://yourdomain.com/health
   ```
