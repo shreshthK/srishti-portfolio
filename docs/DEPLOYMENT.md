@@ -432,22 +432,22 @@ Go to your GitHub repository: **Settings > Secrets and variables > Actions**
 
 ### Step 4.3: Test CI/CD Pipeline
 
-- [ ] Make a small change and push:
+- [x] Make a small change and push:
   ```bash
   git add .
   git commit -m "Setup CI/CD infrastructure"
   git push origin main
   ```
 
-- [ ] Go to GitHub > **Actions** tab
+- [x] Go to GitHub > **Actions** tab
 
-- [ ] Verify CI workflow runs and passes
+- [x] Verify CI workflow runs and passes
 
-- [ ] Verify CD workflow runs and deploys
+- [x] Verify CD workflow runs and deploys
 
-- [ ] Test the deployment:
+- [x] Test the deployment:
   ```bash
-  curl http://YOUR_EC2_IP/health
+  curl http://3.214.56.190/health
   ```
   Expected: `healthy`
 
@@ -461,16 +461,16 @@ Go to your GitHub repository: **Settings > Secrets and variables > Actions**
 
 **Option A: Register via Route 53**
 
-- [ ] Go to **AWS Console > Route 53 > Registered Domains**
-- [ ] Click **Register Domain**
-- [ ] Search for your desired domain
-- [ ] Complete registration (~$12/year for .com)
-- [ ] Note the Hosted Zone ID:
+- [x] Go to **AWS Console > Route 53 > Registered Domains**
+- [x] Click **Register Domain**
+- [x] Search for your desired domain
+- [x] Complete registration (~$12/year for .com)
+- [x] Note the Hosted Zone ID:
 
   | Info | Your Value |
   |------|------------|
-  | Domain Name | `___________________________` |
-  | Hosted Zone ID | `___________________________` |
+  | Domain Name | `srishtirawat.com` |
+  | Hosted Zone ID | `/hostedzone/Z00609752Q5ONTXTA51KY` |
 
 **Option B: Use Existing Domain**
 

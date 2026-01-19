@@ -3,6 +3,7 @@ import { FiAward } from 'react-icons/fi'
 import { SectionWrapper, SectionHeader } from '../ui/SectionWrapper'
 import { ScrollReveal } from '../animations/ScrollReveal'
 import { portfolioData } from '../../data/portfolio-data'
+import avatarImage from '../../images/avatar.png'
 
 export function About() {
   const { name, bio, stats, education } = portfolioData
@@ -47,32 +48,16 @@ export function About() {
                   overflow: 'hidden',
                 }}
               >
-                <div style={{ textAlign: 'center', padding: '2rem' }}>
-                  <div
-                    style={{
-                      width: '8rem',
-                      height: '8rem',
-                      margin: '0 auto 1rem',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--color-accent), var(--color-accent-light))',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: '3rem',
-                        fontWeight: 700,
-                        color: 'white',
-                        fontFamily: 'var(--font-heading)',
-                      }}
-                    >
-                      {name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                  <p style={{ color: 'var(--color-secondary)', fontSize: '0.875rem' }}>Profile Photo</p>
-                </div>
+                <img
+                  src={avatarImage}
+                  alt={`${name} profile`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '0.875rem',
+                  }}
+                />
               </div>
             </div>
           </div>
